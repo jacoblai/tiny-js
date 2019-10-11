@@ -5,9 +5,25 @@ var indexRouter = require('./routes/index');
 
 var app = express();
 
+function defaultContentTypeMiddleware(req, res, next) {
+    req.headers['content-type'] = req.headers['content-type'] || 'application/json';
+    next();
+}
+app.use(defaultContentTypeMiddleware);
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
+
+app.all('*', function (req, res, next) {
+    if (!req.get('Origin')) return next();
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.set('Access-Control-Allow-Headers', 'U-ApiKey, Content-Type');
+    //res.set('Access-Control-Allow-Max-Age', 3600);
+    if ('OPTIONS' === req.method) return res.status(200).end();
+    next();
+});
 
 app.use('/', indexRouter);
 
