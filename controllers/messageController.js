@@ -42,10 +42,6 @@ class MessageController {
     }
 
     setRoot(root) {
-        let validator = Joi.object().keys({
-            content: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
-            author: Joi.string().email({minDomainAtoms: 2})
-        });
         let mongo = mongoUtil.getDb();
         root.getMessage = async function ({id}, req) {
             let role = req.header("role");
@@ -65,7 +61,7 @@ class MessageController {
             return new Message(res._id.toString(), res.content, res.author);
         };
         root.createMessage = async function ({input}) {
-            const vali = await Joi.validate(input, validator);
+            const vali = await Joi.validate(input, Message.validator());
             if (vali.error) {
                 throw new Error(vali.error.errmsg);
             }
@@ -79,7 +75,7 @@ class MessageController {
             if (!ObjectID.isValid(id)) {
                 throw new Error('id is valid');
             }
-            const vali = await Joi.validate(input, validator);
+            const vali = await Joi.validate(input, Message.validator());
             if (vali.error) {
                 throw new Error(vali.error.errmsg);
             }
