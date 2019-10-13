@@ -47,13 +47,32 @@ mongoUtil.connectToServer(function (err) {
             existing: Boolean
           }
           `;
+    let query = `
+      type Query {
+    `;
+    let mutation = `
+      type Mutation {
+    `;
+    let schemaEnd = `
+      }
+    `;
     let root = {};
 
     //message
     let msgCon = new messageCon();
-    schema += msgCon.getSchema();
+    let msgSchema = msgCon.getSchema();
+    schema += msgSchema.schema;
+    query += msgSchema.query;
+    mutation += msgSchema.mutation;
     msgCon.setRoot(root);
 
+
+    //query end builder
+    query += schemaEnd;
+    //mutation end builder
+    mutation += schemaEnd;
+    //merge
+    schema += query + mutation;
     app.use('/graphql', graphqlHTTP({
         schema: buildASTSchema(gql(schema)),
         rootValue: root,

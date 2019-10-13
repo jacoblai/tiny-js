@@ -8,7 +8,8 @@ class MessageController {
     }
 
     getSchema() {
-        return `
+        return {
+            schema: `
           """
           创建消息结构类型
           """
@@ -29,15 +30,14 @@ class MessageController {
             "发送者"
             author: String
           }
-          type Query {
-            getMessage(id: String!): Message
-          }
-          type Mutation {
-            createMessage(input: MessageInput): Message
-            updateMessage(id: String!, input: MessageInput): Result
-            deleteMessage(id: String!): Result
-          }
-        `;
+        `, query: `
+          getMessage(id: String!): Message
+        `, mutation: `
+          createMessage(input: MessageInput): Message
+          updateMessage(id: String!, input: MessageInput): Result
+          deleteMessage(id: String!): Result
+        `
+        }
     }
 
     setRoot(root) {
