@@ -33,7 +33,7 @@ class MessageController {
         let mongo = mongoUtil.getDb();
         root.getMessage = async function ({id}, req) {
             let role = req.header("role");
-            console.log(role);
+            // console.log(role);
             if (!ObjectID.isValid(id)) {
                 throw new Error('id is valid');
             }

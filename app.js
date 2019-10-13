@@ -17,7 +17,7 @@ function defaultContentTypeMiddleware(req, res, next) {
 
 app.use(defaultContentTypeMiddleware);
 
-app.use(logger('dev'));
+// app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
@@ -36,14 +36,17 @@ mongoUtil.connectToServer(function (err) {
     // Construct a schema, using GraphQL schema language
     let schema = ` 
           type Result {
+            # 操作是否成功
             ok: Boolean!
+            # 操作数据记录生效数量
             n: Int
+            # 是否操作了有效数据
             existing: Boolean
           }
           `;
     let root = {};
 
-//message
+    //message
     let msgCon = new messageCon();
     schema += msgCon.getSchema();
     msgCon.setRoot(root);
@@ -55,14 +58,14 @@ mongoUtil.connectToServer(function (err) {
         pretty: true,
     }));
 
-// catch 404 and forward to error handler
+    // catch 404 and forward to error handler
     app.use(function (req, res, next) {
         var err = new Error('Not Found');
         err.status = 404;
         next(err);
     });
 
-// error handler
+    // error handler
     app.use(function (err, req, res, next) {
         // set locals, only providing error in development
         res.locals.message = err.message;
