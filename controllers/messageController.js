@@ -1,6 +1,7 @@
 let {ObjectID} = require("mongodb");
 let mongoUtil = require('../utils/mongoUtil');
 let Result = require('../models/result');
+let Joi = require('joi');
 let Message = require('../models/message');
 
 class MessageController {
@@ -41,6 +42,10 @@ class MessageController {
     }
 
     setRoot(root) {
+        let validator = Joi.object().keys({
+            content: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
+            author: Joi.string().email({minDomainAtoms: 2})
+        });
         let mongo = mongoUtil.getDb();
         root.getMessage = async function ({id}, req) {
             let role = req.header("role");
@@ -60,6 +65,10 @@ class MessageController {
             return new Message(res._id.toString(), res.content, res.author);
         };
         root.createMessage = async function ({input}) {
+            const vali = await Joi.validate(input, validator);
+            if (vali.error) {
+                throw new Error(vali.error.errmsg);
+            }
             let res = await mongo.collection("msg").insertOne(input);
             if (res.error) {
                 throw new Error(res.error.errmsg);
@@ -69,6 +78,10 @@ class MessageController {
         root.updateMessage = async function ({id, input}) {
             if (!ObjectID.isValid(id)) {
                 throw new Error('id is valid');
+            }
+            const vali = await Joi.validate(input, validator);
+            if (vali.error) {
+                throw new Error(vali.error.errmsg);
             }
             let res = await mongo.collection("msg").countDocuments({_id: ObjectID(id)});
             if (res === 0) {
