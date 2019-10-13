@@ -35,12 +35,15 @@ app.use(auth);
 mongoUtil.connectToServer(function (err) {
     // Construct a schema, using GraphQL schema language
     let schema = ` 
+          """
+          通用操作返回类型
+          """
           type Result {
-            # 操作是否成功
+            "操作是否成功"
             ok: Boolean!
-            # 操作数据记录生效数量
+            "操作数据记录生效数量"
             n: Int
-            # 是否操作了有效数据
+            "是否操作了有效数据"
             existing: Boolean
           }
           `;
