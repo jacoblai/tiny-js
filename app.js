@@ -26,7 +26,7 @@ function auth(req, res, next) {
     if (uid === "jacoblai") {
         req.headers["role"] = "admin";
     }
-    console.log('uid:', uid);
+    // console.log('uid:', uid);
     next();
 }
 
