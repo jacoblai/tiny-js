@@ -22,11 +22,13 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 function auth(req, res, next) {
-    let uid = req.header("Authentication");
-    if (uid === "jacoblai") {
-        req.headers["role"] = "admin";
+    if (req.method === "POST"){
+        let uid = req.header("Authentication");
+        if (uid === "jacoblai") {
+            req.headers["role"] = "admin";
+            console.log('uid:', uid);
+        }
     }
-    // console.log('uid:', uid);
     next();
 }
 
@@ -73,11 +75,12 @@ mongoUtil.connectToServer(function (err) {
     mutation += schemaEnd;
     //merge
     schema += query + mutation;
-    app.use('/graphql', graphqlHTTP({
+    // console.log(schema);
+    app.use('/', graphqlHTTP({
         schema: buildASTSchema(gql(schema)),
         rootValue: root,
-        graphiql: true,
-        pretty: true,
+        graphiql: false,
+        pretty: false,
     }));
 
     // catch 404 and forward to error handler
