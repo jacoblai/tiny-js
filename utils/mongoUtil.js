@@ -1,5 +1,5 @@
 const MongoClient = require( 'mongodb' ).MongoClient;
-const url = "mongodb://localhost:27017";
+const url = "mongodb://root:root@192.168.101.68:27017,192.168.101.69:27017,192.168.101.70:27017/?authSource=admin&replicaSet=rs1";
 
 let _db;
 
