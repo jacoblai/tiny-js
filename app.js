@@ -35,6 +35,10 @@ function auth(req, res, next) {
 app.use(auth);
 
 mongoUtil.connectToServer(function (err) {
+    if (err){
+        console.log("error: " + err.name +" "+ err.message);
+        return
+    }
     // Construct a schema, using GraphQL schema language
     let schema = ` 
           """

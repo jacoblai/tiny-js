@@ -41,6 +41,7 @@ class MessageController {
     }
 
     setRoot(root) {
+        let client = mongoUtil.getClient();
         let mongo = mongoUtil.getDb();
         root.getMessage = async function ({id}, req) {
             let role = req.header("role");
@@ -64,11 +65,22 @@ class MessageController {
             if (err) {
                 throw new Error(err.errmsg);
             }
-            let res = await mongo.collection("msg").insertOne(input);
-            if (res.error) {
-                throw new Error(res.error.errmsg);
+            const session = client.startSession();
+            session.startTransaction({});
+            try {
+                const opts = {session, returnOriginal: false};
+                let res = await mongo.collection("msg").insertOne(input, opts);
+                if (res.error) {
+                    throw new Error(res.error.errmsg);
+                }
+                await session.commitTransaction();
+                session.endSession();
+                return new Message(res.insertedId.toString());
+            } catch (error) {
+                await session.abortTransaction();
+                session.endSession();
+                throw error;
             }
-            return new Message(res.insertedId.toString());
         };
         root.updateMessage = async function ({id, input}) {
             if (!ObjectID.isValid(id)) {
