@@ -7,39 +7,6 @@ class MessageController {
     constructor() {
     }
 
-    getSchema() {
-        return {
-            schema: `
-          """
-          创建消息结构类型
-          """
-          input MessageInput {
-            "消息内容"
-            content: String
-            "发送者"
-            author: String
-          }
-          """
-          消息类型
-          """
-          type Message {
-            "ObjectId的hex字符串形式"
-            id: String!
-            "消息内容"
-            content: String
-            "发送者"
-            author: String
-          }
-        `, query: `
-          getMessage(id: String!): Message
-        `, mutation: `
-          createMessage(input: MessageInput): Message
-          updateMessage(id: String!, input: MessageInput): Result
-          deleteMessage(id: String!): Result
-        `
-        }
-    }
-
     setRoot(root) {
         let client = mongoUtil.getClient();
         let mongo = mongoUtil.getDb();

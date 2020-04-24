@@ -1,0 +1,47 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    getMessage(id: String!): Message
+}
+
+type Mutation {
+    createMessage(input: MessageInput): Message
+    updateMessage(id: String!, input: MessageInput): Result
+    deleteMessage(id: String!): Result
+}
+
+"""
+通用操作返回类型
+"""
+type Result {
+    "操作是否成功"
+    ok: Boolean!
+    "操作数据记录生效数量"
+    n: Int
+    "是否操作了有效数据"
+    existing: Boolean
+}
+
+"""
+创建消息结构类型
+"""
+input MessageInput {
+    "消息内容"
+    content: String
+    "发送者"
+    author: String
+}
+"""
+消息类型
+"""
+type Message {
+    "ObjectId的hex字符串形式"
+    id: String!
+    "消息内容"
+    content: String
+    "发送者"
+    author: String
+}

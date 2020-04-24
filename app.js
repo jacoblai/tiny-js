@@ -1,4 +1,5 @@
 let express = require('express');
+let fs = require("fs");
 const cors = require('cors');
 const graphqlHTTP = require('express-graphql');
 let logger = require('morgan');
@@ -17,7 +18,7 @@ function defaultContentTypeMiddleware(req, res, next) {
 
 app.use(defaultContentTypeMiddleware);
 
-// app.use(logger('dev'));
+app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
@@ -39,46 +40,14 @@ mongoUtil.connectToServer(function (err) {
         console.log("error: " + err.name +" "+ err.message);
         return
     }
-    // Construct a schema, using GraphQL schema language
-    let schema = ` 
-          """
-          通用操作返回类型
-          """
-          type Result {
-            "操作是否成功"
-            ok: Boolean!
-            "操作数据记录生效数量"
-            n: Int
-            "是否操作了有效数据"
-            existing: Boolean
-          }
-          `;
-    let query = `
-      type Query {
-    `;
-    let mutation = `
-      type Mutation {
-    `;
-    let schemaEnd = `
-      }
-    `;
     let root = {};
 
     //message
     let msgCon = new messageCon();
-    let msgSchema = msgCon.getSchema();
-    schema += msgSchema.schema;
-    query += msgSchema.query;
-    mutation += msgSchema.mutation;
     msgCon.setRoot(root);
 
-
-    //query end builder
-    query += schemaEnd;
-    //mutation end builder
-    mutation += schemaEnd;
-    //merge
-    schema += query + mutation;
+    //load schema
+    let schema = fs.readFileSync(__dirname+'/bin/schema.graphql', 'utf8');
     // console.log(schema);
     app.use('/', graphqlHTTP({
         schema: buildASTSchema(gql(schema)),
