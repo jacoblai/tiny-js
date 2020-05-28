@@ -24,7 +24,11 @@ class gqlValidator {
                     }
                     continue;
                 }
-                let l = o.toString().length;
+                let str = o.toString();
+                if (str.includes('$')){
+                    throw new Error(k + ' field invalid injection');
+                }
+                let l = str.length;
                 if (l === 0){
                     throw new Error(k + ' field invalid too small');
                 }
