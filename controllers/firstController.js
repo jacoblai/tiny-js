@@ -23,6 +23,23 @@ class FirstController {
             res['id'] = res["_id"];
             return res;
         };
+        root.searchMessage = async function ({author,skip,limit}, req) {
+            let role = req.header("role");
+            console.log(role);
+
+            let q = [{"$match": {"author": author}},{"$skip": skip},{"$limit": limit}];
+            let res = await mongo_msg.aggregate(q).toArray();
+            if (res === null) {
+                throw new Error("not found");
+            }
+            if (res.error) {
+                throw new Error(res.error.errmsg);
+            }
+            if (res.hasOwnProperty('id')){
+                res['id'] = res["_id"];
+            }
+            return res;
+        };
         root.createMessage = async function ({input}) {
             const err = await validator.validate(input);
             if (err) {

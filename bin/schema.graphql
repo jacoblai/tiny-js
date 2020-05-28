@@ -5,6 +5,7 @@ schema {
 
 type Query {
     getMessage(id: String!): Message
+    searchMessage(author: String!, skip: Int, limit: Int): [Message]
 }
 
 type Mutation {
