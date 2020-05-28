@@ -1,13 +1,13 @@
+let {ObjectID} = require("mongodb");
+
 class gqlValidator {
     static async validate(input) {
-        if (typeof input == "string") {
-            if (!ObjectID.isValid(input.toString())) {
-                throw new Error('id is valid not object id');
-            }
-        }
         for (let k in input) {
             let o = input[k];
-            if (typeof o != "object" && typeof o != "function" || o === null) {
+            if (typeof o == "object"){
+                this.validate(o);
+            }
+            if (typeof o == "function" || o === null) {
                 continue;
             }
             if (typeof o == "string") {
@@ -24,7 +24,11 @@ class gqlValidator {
                     }
                     continue;
                 }
-                if (o.toString().length > 1024) {
+                let l = o.toString().length;
+                if (l === 0){
+                    throw new Error(k + ' field invalid too small');
+                }
+                if (l > 1024) {
                     throw new Error(k + ' field invalid too large');
                 }
             }

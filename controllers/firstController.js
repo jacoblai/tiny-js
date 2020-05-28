@@ -14,19 +14,19 @@ class FirstController {
             console.log(role);
 
             let res = await mongo_msg.findOne({_id: ObjectID(id)});
-            if (res === null){
+            if (res === null) {
                 throw new Error("not found");
             }
             if (res.error) {
                 throw new Error(res.error.errmsg);
             }
-            res['id']= res["_id"];
+            res['id'] = res["_id"];
             return res;
         };
         root.createMessage = async function ({input}) {
             const err = await validator.validate(input);
             if (err) {
-                return  {"ok":false, "err":err.errmsg}
+                return {"ok": false, "err": err.errmsg}
             }
             const session = client.startSession();
             session.startTransaction({});
@@ -34,41 +34,38 @@ class FirstController {
                 const opts = {session, returnOriginal: false};
                 let res = await mongo_msg.insertOne(input, opts);
                 if (res.error) {
-                    return  {"ok":false, "err":res.error.errmsg}
+                    return {"ok": false, "err": res.error.errmsg}
                 }
                 await session.commitTransaction();
                 session.endSession();
-                return {"ok":true, data:res.insertedId.toString()};
+                return {"ok": true, data: res.insertedId.toString()};
             } catch (err) {
                 await session.abortTransaction();
                 session.endSession();
-                return  {"ok":false, "err":err.errmsg}
+                return {"ok": false, "err": err.errmsg}
             }
         };
         root.updateMessage = async function ({id, input}) {
-            if (!ObjectID.isValid(id)) {
-                return  {"ok":false, "err":'id is valid'}
-            }
-            const err = await validator.validate(input);
+            const err = await validator.validate({id, input});
             if (err) {
-                return  {"ok":false, "err":err.errmsg}
+                return {"ok": false, "err": err.errmsg}
             }
-
             let res = await mongo_msg.findOneAndUpdate({_id: ObjectID(id)}, {"$set": input});
             if (res.error) {
-                return  {"ok":false, "err":res.error.errmsg}
+                return {"ok": false, "err": res.error.errmsg}
             }
-            return {"ok":res.ok, "n":res.lastErrorObject.n}
+            return {"ok": res.ok, "n": res.lastErrorObject.n}
         };
         root.deleteMessage = async function ({id}) {
-            if (!ObjectID.isValid(id)) {
-                return  {"ok":false, "err":'id is valid'}
+            const err = await validator.validate({id});
+            if (err) {
+                return {"ok": false, "err": err.errmsg}
             }
             let res = await mongo_msg.findOneAndDelete({_id: ObjectID(id)});
             if (res.error) {
-                return {"ok":false, "err":res.error.errmsg}
+                return {"ok": false, "err": res.error.errmsg}
             }
-            return {"ok":res.ok, "n":res.lastErrorObject.n}
+            return {"ok": res.ok, "n": res.lastErrorObject.n}
         }
     }
 }
