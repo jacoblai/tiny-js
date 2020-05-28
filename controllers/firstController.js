@@ -14,6 +14,9 @@ class FirstController {
             console.log(role);
 
             let res = await mongo_msg.findOne({_id: ObjectID(id)});
+            if (res === null){
+                throw new Error("not found");
+            }
             if (res.error) {
                 throw new Error(res.error.errmsg);
             }
@@ -31,7 +34,7 @@ class FirstController {
                 const opts = {session, returnOriginal: false};
                 let res = await mongo_msg.insertOne(input, opts);
                 if (res.error) {
-                    return  {"ok":false, "err":res.error.errmsgg}
+                    return  {"ok":false, "err":res.error.errmsg}
                 }
                 await session.commitTransaction();
                 session.endSession();

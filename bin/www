@@ -7,33 +7,56 @@
 let app = require('../app');
 let debug = require('debug')('tiny-js:server');
 let http = require('http');
-// let https = require('https');
+let https = require('https');
 let fs = require("fs");
-// let privateKey  = fs.readFileSync(__dirname+'/server.key', 'utf8');
-// let certificate = fs.readFileSync(__dirname+'/server.pem', 'utf8');
-//let credentials = {key: privateKey, cert: certificate};
-
+let privateKey  = fs.readFileSync(__dirname+'/server.key', 'utf8');
+let certificate = fs.readFileSync(__dirname+'/server.pem', 'utf8');
+let credentials = {key: privateKey, cert: certificate};
+let cluster = require('cluster');
 /**
  * Get port from environment and store in Express.
  */
 
-let port = normalizePort(process.env.PORT || '3000');
+let port = normalizePort(process.env.PORT || '3000'); //当改为443时即启用tls
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
-
-let server = http.createServer(app);
-//let httpsServer = https.createServer(credentials, app);
+let server;
+if (port === 443){
+  server = https.createServer(credentials, app);
+}else{
+  server = http.createServer(app);
+}
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+if(cluster.isMaster) {
+  var numWorkers = require('os').cpus().length;
+
+  console.log('Master cluster setting up ' + numWorkers + ' workers...');
+
+  for(var i = 0; i < numWorkers; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('online', function(worker) {
+    // console.log('Worker ' + worker.process.pid + ' is online');
+  });
+
+  cluster.on('exit', function(worker, code, signal) {
+    console.log('Worker ' + worker.process.pid + ' died with code: ' + code + ', and signal: ' + signal);
+    console.log('Starting a new worker');
+    cluster.fork();
+  });
+} else {
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+}
 
 // setInterval(() => server.getConnections(
 //     (err, connections) => console.log(`${connections} connections currently open`)
@@ -64,10 +87,6 @@ function shutDown() {
   connections.forEach(curr => curr.end());
   setTimeout(() => connections.forEach(curr => curr.destroy()), 10000);
 }
-
-// httpsServer.listen(8443);
-// httpsServer.on('error', onError);
-// httpsServer.on('listening', onTlsListening);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -128,11 +147,3 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
-
-// function onTlsListening() {
-//   let addr = httpsServer.address();
-//   let bind = typeof addr === 'string'
-//       ? 'pipe ' + addr
-//       : 'port ' + addr.port;
-//   debug('Listening on ' + bind);
-// }
