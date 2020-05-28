@@ -5,7 +5,9 @@ const graphqlHTTP = require('express-graphql');
 let logger = require('morgan');
 const gql = require('graphql-tag');
 const {buildASTSchema} = require('graphql');
+const {NoIntrospection} =require('graphql-disable-introspection');
 let mongoUtil = require('./utils/mongoUtil');
+let config = require('./config');
 let firstCon = require('./controllers/firstController');
 
 let app = express();
@@ -49,12 +51,16 @@ mongoUtil.connectToServer(function (err) {
     //load schema
     let schema = fs.readFileSync(__dirname+'/bin/schema.graphql', 'utf8');
     // console.log(schema);
-    app.use('/', graphqlHTTP({
+    let opts = {
         schema: buildASTSchema(gql(schema)),
         rootValue: root,
         graphiql: false,
         pretty: false,
-    }));
+    };
+    if (config.port === 443){
+        opts.validationRules = [NoIntrospection];
+    }
+    app.use('/', graphqlHTTP(opts));
 
     // catch 404 and forward to error handler
     app.use(function (req, res, next) {
