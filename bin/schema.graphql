@@ -8,7 +8,7 @@ type Query {
 }
 
 type Mutation {
-    createMessage(input: MessageInput): Message
+    createMessage(input: MessageInput): Result
     updateMessage(id: String!, input: MessageInput): Result
     deleteMessage(id: String!): Result
 }
@@ -19,10 +19,12 @@ type Mutation {
 type Result {
     "操作是否成功"
     ok: Boolean!
-    "操作数据记录生效数量"
-    n: Int
-    "是否操作了有效数据"
-    existing: Boolean
+    "操作成功时返回值"
+    data: String
+    "错误信息"
+    err: String
+    "操作生效记录"
+    n:Int
 }
 
 """

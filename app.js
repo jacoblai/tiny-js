@@ -6,7 +6,7 @@ let logger = require('morgan');
 const gql = require('graphql-tag');
 const {buildASTSchema} = require('graphql');
 let mongoUtil = require('./utils/mongoUtil');
-let messageCon = require('./controllers/messageController');
+let firstCon = require('./controllers/firstController');
 
 let app = express();
 app.use(cors());
@@ -43,8 +43,8 @@ mongoUtil.connectToServer(function (err) {
     let root = {};
 
     //message
-    let msgCon = new messageCon();
-    msgCon.setRoot(root);
+    let first = new firstCon();
+    first.setRoot(root);
 
     //load schema
     let schema = fs.readFileSync(__dirname+'/bin/schema.graphql', 'utf8');
